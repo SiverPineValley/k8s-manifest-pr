@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: sample-configmap-pod
+  name: sample-configmap-pod
+  namespace: practice
+spec:
+  containers:
+  - env:
+    - name: HOSTNAME
+      value: sample-configmap-pod
+    - name: NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: CPU
+      valueFrom:
+        resourceFieldRef:
+          containerName: configmap-container
+          resource: limits.cpu
+    - name: CONNECTION_MAX
+      valueFrom:
+        configMapKeyRef:
+          key: connection.max
+          name: sample-configmap
+    image: nginx:1.18
+    name: configmap-container
+    volumeMounts:
+    - mountPath: /mnt
+      name: sample-configmap-volume
+  volumes:
+  - name: sample-configmap-volume
+    configMap:
+      name: sample-configmap
+      items:
+      - key: default.conf
+        path: nginx.conf
